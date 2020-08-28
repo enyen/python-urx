@@ -33,9 +33,13 @@ class Program(object):
     def __init__(self, prog):
         self.program = prog
         self.condition = Condition()
+        self.script = 'def '.encode() in prog or 'sec '.encode() in prog
 
     def __str__(self):
-        return "Program({})".format(self.program)
+        if self.script:
+            return "{}".format(self.program)
+        else:
+            return "Program({})".format(self.program)
     __repr__ = __str__
 
 
