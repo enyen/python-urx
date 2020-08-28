@@ -215,8 +215,6 @@ class URRobot(object):
             self.logger.debug("No threshold set, setting it to %s", threshold)
         count = 0
         while True:
-            if not self.is_running():
-                raise RobotException("Robot stopped")
             dist = self._get_dist(target, joints)
             self.logger.debug("distance to target is: %s, target dist is %s", dist, threshold)
             if not self.secmon.is_program_running():
