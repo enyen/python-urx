@@ -130,6 +130,15 @@ class Robot(URRobot):
             self.logger.debug("Returning pose to user: %s", trans.pose_vector)
         return trans
 
+    def get_tcp_ft(self, wait=True):
+        """
+        get force and torque of tcp in tcp frame
+        """
+        b2force = self.get_tcp_force(wait)
+        tcp2b = m3d.Transform(URRobot.getl(self, wait, False)).orient.inverse
+        ft = (tcp2b * m3d.Vector(b2force[:3])).list + (tcp2b * m3d.Vector(b2force[3:])).list
+        return ft
+
     def get_orientation(self, wait=False):
         """
         get tool orientation in base coordinate system
