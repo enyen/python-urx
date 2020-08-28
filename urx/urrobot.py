@@ -86,6 +86,15 @@ class URRobot(object):
         self.logger.info("Sending program: " + prog)
         self.secmon.send_program(prog)
 
+    def send_program2(self, prog):
+        """
+        send a complete program using urscript to the robot
+        the program is executed immediatly and any runnning
+        program is interrupted
+        """
+        self.logger.info("Sending program: " + prog)
+        self.rtmon.send_program(prog)
+
     def get_tcp_force(self, wait=True):
         """
         return measured force in TCP
@@ -262,7 +271,7 @@ class URRobot(object):
         vels.append(acc)
         vels.append(min_time)
         prog = "{}([{},{},{},{},{},{}], a={}, t={})".format(command, *vels)
-        self.send_program(prog)
+        self.send_program2(prog)
 
     def movej(self, joints, acc=0.1, vel=0.05, wait=True, relative=False, threshold=None):
         """
