@@ -10,10 +10,10 @@ import struct
 import time
 import threading
 from copy import deepcopy
-
 import numpy as np
-
 import math3d as m3d
+
+from urx.ursecmon import Program
 
 __author__ = "Morten Lind, Olivier Roulet-Dubonnet"
 __copyright__ = "Copyright 2011, NTNU/SINTEF Raufoss Manufacturing AS"
@@ -55,6 +55,8 @@ class URRTMonitor(threading.Thread):
         self._buffer = []
         self._csys = None
         self._csys_lock = threading.Lock()
+        self._prog = None
+        self._prog_lock = threading.Lock()
 
     def set_csys(self, csys):
         with self._csys_lock:
@@ -139,6 +141,25 @@ class URRTMonitor(threading.Thread):
             else:
                 return tcf_force
     getTCFForce = tcf_force
+
+    def send_program(self, prog):
+        """
+        send program to robot in URRobot format
+        If another program is send while a program is running the first program is aborded.
+        """
+        prog.strip()
+        if not isinstance(prog, bytes):
+            prog = prog.encode()
+
+        data = Program(prog + b"\n")
+        with self._prog_lock:
+            self._prog = data
+
+    def __send_urscript(self):
+        with self._prog_lock:
+            if self._prog is not None:
+                self._rtSock.send(self._prog.program)
+                self._prog = None
 
     def __recv_rt_data(self):
         head = self.__recv_bytes(4)
@@ -260,4 +281,5 @@ class URRTMonitor(threading.Thread):
         self._rtSock.connect((self._urHost, 30003))
         while not self._stop_event:
             self.__recv_rt_data()
+            self.__send_urscript()
         self._rtSock.close()
