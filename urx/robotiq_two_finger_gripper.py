@@ -103,6 +103,9 @@ class RobotiqScript(URScript):
     def _set_gripper_activate(self):
         self._socket_set_var(GTO, 1, self.socket_name)
 
+    def _set_robot_activate(self):
+        self._socket_set_var(ACT, 1, self.socket_name)
+
     def _set_gripper_force(self, value):
         """
         FOR is the variable
@@ -133,28 +136,20 @@ class RobotiqScript(URScript):
         value = self._constrain_unsigned_char(value)
         self._socket_set_var(SPE, value, self.socket_name)
 
-    def _set_robot_activate(self):
-        self._socket_set_var(ACT, 1, self.socket_name)
-
 
 class Robotiq_Two_Finger_Gripper(object):
 
     def __init__(self,
                  robot,
-                 payload=0.85,
-                 speed=255,
-                 force=50,
                  socket_host=SOCKET_HOST,
                  socket_port=SOCKET_PORT,
                  socket_name=SOCKET_NAME):
         self.robot = robot
-        self.payload = payload
-        self.speed = speed
-        self.force = force
         self.socket_host = socket_host
         self.socket_port = socket_port
         self.socket_name = socket_name
         self.logger = logging.getLogger(u"robotiq")
+        self.gripper_action(0, activate=True)
 
     def _get_new_urscript(self):
         """
@@ -174,32 +169,28 @@ class Robotiq_Two_Finger_Gripper(object):
         urscript._set_tool_voltage(0)
         urscript._set_runstate_outputs()
 
-        # Set payload, speed and force
-        urscript._set_payload(self.payload)
-        urscript._set_gripper_speed(self.speed)
-        urscript._set_gripper_force(self.force)
-
-        # Initialize the gripper
-        urscript._set_robot_activate()
-        urscript._set_gripper_activate()
-
         # Wait on activation to avoid USB conflicts
         urscript._sleep(0.1)
 
         return urscript
 
-    def gripper_action(self, value):
+    def gripper_action(self, value, speed=255, force=255, payload=1, activate=False):
         """
         Activate the gripper to a given value from 0 to 255
 
         0 is open
         255 is closed
         """
-        urscript = self._get_new_urscript()
-
-        # Move to the position
         sleep = 2.0
+
+        urscript = self._get_new_urscript()
+        if activate:
+            urscript._set_robot_activate()
         urscript._set_gripper_position(value)
+        urscript._set_gripper_speed(speed)
+        urscript._set_gripper_force(force)
+        urscript._set_payload(payload)
+        urscript._set_gripper_activate()
         urscript._sleep(sleep)
 
         # Send the script
