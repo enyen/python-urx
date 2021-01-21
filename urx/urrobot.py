@@ -441,6 +441,7 @@ class URRobot(object):
         self.secmon.close()
         if self.rtmon:
             self.rtmon.stop()
+            self.rtmon.close()
 
     def set_freedrive(self, val, timeout=60):
         """

@@ -135,7 +135,7 @@ class Robot(URRobot):
         get force and torque of tcp in tcp frame
         """
         b2force = self.get_tcp_force(wait)
-        tcp2b = m3d.Transform(URRobot.getl(self, wait, False)).orient.inverse
+        tcp2b = m3d.Transform(self.rtmon.getTCF(wait).tolist()).orient.inverse
         ft = (tcp2b * m3d.Vector(b2force[:3])).list + (tcp2b * m3d.Vector(b2force[3:])).list
         return ft
 
